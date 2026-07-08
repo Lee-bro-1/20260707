@@ -785,6 +785,16 @@
       }
     }
 
+    function formatSupabaseError(error) {
+      if (!error) {
+        return "알 수 없는 오류";
+      }
+
+      const code = error.code ? ` (${error.code})` : "";
+      const hint = error.message ? error.message : String(error);
+      return `${hint}${code}`;
+    }
+
     function clampCount(value) {
       const num = Number(value);
       if (!Number.isFinite(num)) return 1;
@@ -1105,7 +1115,7 @@
         console.error(error);
         useSupabase = false;
         connectionTag.textContent = "Supabase 연결 실패";
-        footerNote.textContent = "Supabase 설정을 확인하세요. 지금은 로컬 모드로 계속 사용할 수 있습니다.";
+        footerNote.textContent = `Supabase 설정을 확인하세요. 오류: ${formatSupabaseError(error)}`;
         const local = loadLocalState();
         state.history = local.history;
         state.drawCount = local.drawCount;

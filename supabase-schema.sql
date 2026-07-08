@@ -5,6 +5,10 @@ create table if not exists public.lotto_draws (
   bonus integer not null check (bonus between 1 and 45)
 );
 
+grant usage on schema public to anon;
+grant select, insert, delete on table public.lotto_draws to anon;
+grant usage, select on sequence public.lotto_draws_id_seq to anon;
+
 alter table public.lotto_draws enable row level security;
 
 create policy "Allow public read access"
