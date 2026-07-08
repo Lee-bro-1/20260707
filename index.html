@@ -932,6 +932,14 @@
       connectionTag.textContent = message;
     }
 
+    function trackEvent(eventName, params = {}) {
+      if (typeof window.gtag !== "function") {
+        return;
+      }
+
+      window.gtag("event", eventName, params);
+    }
+
     async function testSupabaseConnection() {
       initSupabaseClient();
       setConnectionLabel();
@@ -1196,6 +1204,12 @@
     async function drawSets() {
       const count = syncCount(countNumber.value);
       const generated = [];
+      trackEvent("lotto_draw_click", {
+        event_category: "engagement",
+        event_label: "번호 추첨하기",
+        draw_count: count,
+        transport_type: "beacon"
+      });
 
       for (let i = 0; i < count; i += 1) {
         generated.push(makeSet());
