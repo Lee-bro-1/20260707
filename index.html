@@ -790,9 +790,14 @@
         return "알 수 없는 오류";
       }
 
-      const code = error.code ? ` (${error.code})` : "";
+      const code = error.code ? ` [code: ${error.code}]` : "";
+      const status = error.status ? ` [status: ${error.status}]` : "";
       const hint = error.message ? error.message : String(error);
-      return `${hint}${code}`;
+      return `${hint}${code}${status}`;
+    }
+
+    function updateConnectionStatus(message) {
+      connectionTag.textContent = message;
     }
 
     function clampCount(value) {
@@ -840,6 +845,7 @@
 
     async function loadHistory() {
       if (useSupabase && supabaseClient) {
+        updateConnectionStatus("Supabase 확인 중");
         const { data, error } = await supabaseClient
           .from(SUPABASE_TABLE)
           .select("id,numbers,bonus,created_at")
@@ -853,6 +859,7 @@
 
         state.history = (data || []).map(normalizeRow);
         state.drawCount = state.history.length;
+        updateConnectionStatus("Supabase 연결됨");
         return;
       }
 
@@ -877,6 +884,7 @@
           throw error;
         }
 
+        state.history = [...(data || []).map(normalizeRow), ...state.history].slice(0, 12);
         return (data || []).map(normalizeRow);
       }
 
@@ -1044,9 +1052,6 @@
       try {
         const saved = await saveHistory(generated);
         state.drawCount += generated.length;
-        if (useSupabase && supabaseClient) {
-          state.history = [...saved, ...state.history].slice(0, 12);
-        }
         render();
         showToast(`${count}세트 추첨이 완료됐습니다.`);
       } catch (error) {
@@ -1057,7 +1062,7 @@
         saveLocalState();
         setConnectionLabel();
         render();
-        showToast("Supabase 저장에 실패해서 로컬 저장으로 전환했습니다.");
+        showToast(`Supabase 저장 실패: ${formatSupabaseError(error)}`);
       }
     }
 
@@ -1114,7 +1119,7 @@
       } catch (error) {
         console.error(error);
         useSupabase = false;
-        connectionTag.textContent = "Supabase 연결 실패";
+        updateConnectionStatus("Supabase 연결 실패");
         footerNote.textContent = `Supabase 설정을 확인하세요. 오류: ${formatSupabaseError(error)}`;
         const local = loadLocalState();
         state.history = local.history;

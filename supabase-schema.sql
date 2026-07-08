@@ -11,18 +11,21 @@ grant usage, select on sequence public.lotto_draws_id_seq to anon;
 
 alter table public.lotto_draws enable row level security;
 
+drop policy if exists "Allow public read access" on public.lotto_draws;
 create policy "Allow public read access"
 on public.lotto_draws
 for select
 to anon
 using (true);
 
+drop policy if exists "Allow public insert access" on public.lotto_draws;
 create policy "Allow public insert access"
 on public.lotto_draws
 for insert
 to anon
 with check (true);
 
+drop policy if exists "Allow public delete access" on public.lotto_draws;
 create policy "Allow public delete access"
 on public.lotto_draws
 for delete
